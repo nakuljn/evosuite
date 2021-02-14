@@ -18,7 +18,7 @@ public abstract class AbstractAESCoverageSuiteFitness extends TestSuiteFitnessFu
 	private static long iteration = 0;
     final double THRESHOLD = 0.000001;
 
-	public static enum Metric { AES, DTR, VDDU,VMDDU,VRDDU,VCDDU,VCMDDU1,VCMDDU2};		//New enum added 1
+	public static enum Metric { AES, DTR, VDDU,VMDDU,VRDDU,VCDDU,VCMDDU1,VCMDDU2, Kcoverage};		//New enum added 1
 	private Metric metric;
 
 	public AbstractAESCoverageSuiteFitness(Metric metric) {
@@ -362,6 +362,31 @@ public abstract class AbstractAESCoverageSuiteFitness extends TestSuiteFitnessFu
     }
 
 
+    public double getKCoverage(Spectrum spectrum, int k){
+        int components = spectrum.getNumComponents();
+        int transactions = spectrum.getNumTransactions();
+        ArrayList<BitSet> A = spectrum.getActivityMatrix();
+        int sum = 0;
+        double result = 0;
+
+        for(int i = 0; i < components; i++){
+            sum = 0;
+            for(BitSet transaction : A){
+                
+                if(transaction.get(i)){
+                    sum += 1;
+                }
+
+            }
+
+            
+            result += Math.min(sum/k, k);
+        }
+
+        return result/transactions;
+
+    }
+
     public double getMetric(Spectrum spectrum) {
 		switch (this.metric) {
         case DTR:
@@ -393,6 +418,7 @@ public abstract class AbstractAESCoverageSuiteFitness extends TestSuiteFitnessFu
 		case VRDDU: {
             return 0.5d * spectrum.basicCoverage();
         }
+
 		case AES:
 		default: {
             double density =  spectrum.getRho();
